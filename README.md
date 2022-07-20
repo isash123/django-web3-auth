@@ -8,7 +8,7 @@ Use with django >= 3.2.0, python >= 3.9
 ## Quickstart
 Install django-web3-auth with pip:
 ```bash
-pip install git+ssh://git@github.com/krilarite/django-web3-auth.git
+pip install git+ssh://git@github.com/isash123/django-web3-auth.git
 ```
 Add it to your INSTALLED_APPS:
 ```python
