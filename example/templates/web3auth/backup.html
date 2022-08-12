@@ -1,0 +1,7 @@
+<script type="text/javascript">
+	window.AUTH_ENDPOINT = "{% url 'web3auth:web3auth_api' %}"
+</script>
+<script type="module">
+	import { connectWalletMetamask } from "{% static 'web3auth/js/web3auth.js' %}"
+	window.connectWallet = connectWallet
+</script>
