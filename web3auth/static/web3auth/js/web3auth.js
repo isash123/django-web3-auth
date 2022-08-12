@@ -50,7 +50,16 @@ function loginWithSignature(address, signature, authUrl, redirect) {
 
 
 export async function getUserAccount(){
-    const provider = window.ethereum
+
+  const provider = new WalletConnectProvider({
+    rpc: {
+      137: "https://polygon-rpc.com",
+    },
+  });
+  
+  //  Enable session (triggers QR Code modal)
+  await provider.enable();
+    // const provider = window.ethereum
     const accounts = await provider.request(
         {
             method: 'eth_requestAccounts'
@@ -92,7 +101,16 @@ export async function authWeb3(authUrl, redirect = true) {
             var token = resp.token;
             var hex_token = asciiToHex(token);
             var from = await getUserAccount();
-            const provider = window.ethereum;
+            const provider = new WalletConnectProvider({
+              rpc: {
+                137: "https://polygon-rpc.com",
+              },
+            });
+            
+            //  Enable session (triggers QR Code modal)
+            await provider.enable();
+
+            // const provider = window.ethereum;
             provider.request(
                 {
                     method: 'personal_sign',
