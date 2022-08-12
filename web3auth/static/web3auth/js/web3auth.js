@@ -50,7 +50,8 @@ function loginWithSignature(address, signature, authUrl, redirect) {
 
 
 export async function getUserAccount(){
-    const accounts = await window.ethereum.request(
+    const provider = window.ethereum
+    const accounts = await provider.request(
         {
             method: 'eth_requestAccounts'
         }
@@ -91,7 +92,8 @@ export async function authWeb3(authUrl, redirect = true) {
             var token = resp.token;
             var hex_token = asciiToHex(token);
             var from = await getUserAccount();
-            window.ethereum.request(
+            const provider = window.ethereum;
+            provider.request(
                 {
                     method: 'personal_sign',
                     params: [
