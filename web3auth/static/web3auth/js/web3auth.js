@@ -1,3 +1,67 @@
+"use strict";
+
+/**
+ * Example JavaScript code that interacts with the page and Web3 wallets
+ */
+
+ // Unpkg imports
+const Web3Modal = window.Web3Modal.default;
+const WalletConnectProvider = window.WalletConnectProvider.default;
+const Fortmatic = window.Fortmatic;
+const evmChains = window.evmChains;
+const CoinbaseWalletSDK = window.CoinbaseWalletSDK;
+
+// Web3modal instance
+let web3Modal
+
+// Chosen wallet provider given by the dialog window
+let provider;
+
+
+// Address of the selected account
+let selectedAccount;
+
+
+/**
+ * Setup the orchestra
+ */
+function init() {
+
+  console.log("Initializing example");
+  console.log("WalletConnectProvider is", WalletConnectProvider);
+  console.log("Fortmatic is", Fortmatic);
+  console.log("window.web3 is", window.web3, "window.ethereum is", window.ethereum);
+
+  // Tell Web3modal what providers we have available.
+  // Built-in web browser provider (only one can exist as a time)
+  // like MetaMask, Brave or Opera is added automatically by Web3modal
+  const providerOptions = {
+    walletconnect: {
+      package: WalletConnectProvider,
+      options: {
+        // Mikko's test key - don't copy as your mileage may vary
+        infuraId: "08fa71e3f14f4829b73cee825e658df1",
+      }
+    },
+
+    coinbasewallet: {
+      package: CoinbaseWalletSDK,
+      options: {
+        // Mikko's TESTNET api key
+        infuraId: "08fa71e3f14f4829b73cee825e658df1",
+      }
+    }
+  };
+
+  web3Modal = new Web3Modal({
+    cacheProvider: false, // optional
+    providerOptions, // required
+    disableInjectedProvider: false, // optional. For MetaMask / Brave / Opera.
+  });
+
+  console.log("Web3Modal instance is", web3Modal);
+}
+
 export function getCookie(name) {
     var cookieValue = null;
     if (document.cookie && document.cookie != '') {
@@ -50,22 +114,11 @@ function loginWithSignature(address, signature, authUrl, redirect) {
 
 
 export async function getUserAccount(){
-
-  const provider = new WalletConnectProvider({
-    rpc: {
-      137: "https://polygon-rpc.com",
-    },
-  });
-  
-  //  Enable session (triggers QR Code modal)
-  await provider.enable();
-    // const provider = window.ethereum
-    const accounts = await provider.request(
-        {
-            method: 'eth_requestAccounts'
-        }
-    );
-    return accounts[0];
+  const web3 = new Web3(provider);
+  const chainId = await web3.eth.getChainId();
+  const chainData = evmChains.getChain(chainId);
+  const accounts = await web3.eth.getAccounts();
+  return accounts[0];
 }
 
 function asciiToHex (str) {
@@ -90,7 +143,6 @@ export async function authWeb3(authUrl, redirect = true) {
     // 4.1 The user with an according eth address is found - you are logged in
     // 4.2 The user with an according eth address is NOT found - you are redirected to signup page
 
-
     var request = new XMLHttpRequest();
     request.open('GET', authUrl, true);
 
@@ -100,17 +152,8 @@ export async function authWeb3(authUrl, redirect = true) {
             var resp = JSON.parse(request.responseText);
             var token = resp.token;
             var hex_token = asciiToHex(token);
-            var from = await getUserAccount();
-            const provider = new WalletConnectProvider({
-              rpc: {
-                137: "https://polygon-rpc.com",
-              },
-            });
+            var from = await getUserAccount(provider);
             
-            //  Enable session (triggers QR Code modal)
-            await provider.enable();
-
-            // const provider = window.ethereum;
             provider.request(
                 {
                     method: 'personal_sign',
@@ -137,5 +180,12 @@ export async function authWeb3(authUrl, redirect = true) {
 }
 
 export async function connectWallet (redirect = true) {
+    init();
+    try {
+      provider = await web3Modal.connect();
+    } catch(e) {
+      console.log("Could not get a wallet connection", e);
+      return;
+    }
     await authWeb3(window.AUTH_ENDPOINT, redirect)
 };
