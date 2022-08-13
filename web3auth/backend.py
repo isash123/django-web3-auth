@@ -26,7 +26,8 @@ class Web3Backend(backends.ModelBackend):
             signature
     ) -> Optional[User]:
         # check if the address the user has provided matches the signature
-        if address != recover_to_addr(token, signature):
+        address = address.lower()
+        if address != recover_to_addr(token, signature).lower():
             raise ValueError('Wallet address does not match signature')
         else:
             # get address field for the user model

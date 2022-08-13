@@ -31,8 +31,8 @@ class AuthForm(forms.Form):
 
     def clean(self):
         cleaned_data = super().clean()
-        signature = cleaned_data.get('signature')
-        address = cleaned_data.get('address')
+        signature = cleaned_data.get('signature').lower()
+        address = cleaned_data.get('address').lower()
         if address != recover_to_addr(self.token, signature):
             raise forms.ValidationError(
                 _('Address used for signing does not match wallet address')
